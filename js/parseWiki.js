@@ -16,12 +16,12 @@ const getFirstParagraph = (element) => {
   ).find((p) => !p.querySelector("#coordinates"));
 };
 
-const getPageData = function (page) {
+const getPageData = (page) => {
   const url = `${Config.api}w/api.php?format=json&origin=*&action=parse&prop=text&section=0&redirects=1&page=${page}`;
   return fetch(url).then((response) => response.json());
 };
 
-const parseWikiData = function (res) {
+const parseWikiData = (res) => {
   if (res.error) {
     log(res.error.code);
     pageContainer.innerHTML = "";
@@ -43,11 +43,11 @@ const parseWikiData = function (res) {
   }
 };
 
-const getLinks = function (page) {
+const getLinks = (page) => {
   return getPageData(page).then((res) => parseWikiData(res));
 };
 
-const showDescription = function (firstParagraph) {
+const showDescription = (firstParagraph) => {
   pageContainer.innerHTML = "";
   pageContainer.appendChild(firstParagraph);
   const aLinks = es("a");

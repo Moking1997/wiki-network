@@ -8,8 +8,7 @@ const languages = es(".search-language-item");
 function __main() {
   initNetWork();
 
-  for (let index = 0; index < languages.length; index++) {
-    const element = languages[index];
+  for (const element of languages) {
     const lg = element.dataset.lg;
     bindEvent(element, "click", () => {
       Config.api = `https://${lg}.wikipedia.org/`;

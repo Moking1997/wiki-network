@@ -33,22 +33,6 @@ const options = {
   },
 };
 
-const setNodesColor = (ns, isHover) => {
-  for (let i = 0; i < ns.length; i += 1) {
-    ns[i].color = isHover ? "#FFC107" : "#97C2FC";
-    delete ns[i].x;
-    delete ns[i].y;
-  }
-  nodes.update(ns);
-};
-
-const setEdgesWidth = (es, width) => {
-  for (let i = 0; i < es.length; i += 1) {
-    es[i].width = width;
-  }
-  edges.update(es);
-};
-
 const getNodesTrace = (node) => {
   let curNode = node;
   let finished = false;
@@ -79,7 +63,32 @@ const getEdgesTrace = (traceNodes) => {
   return traces;
 };
 
-const bindNetwork = function () {
+const getEdgeConnecting = (a, b) => {
+  const edge = edges.get({
+    filter: (e) => e.from === a && e.to === b,
+  })[0];
+
+  return (edge instanceof Object ? edge : {}).id;
+};
+
+const setNodesColor = (ns, isHover) => {
+  for (const node of ns) {
+    node.color = isHover ? "#FFC107" : "#97C2FC";
+    delete node.x;
+    delete node.y;
+  }
+  nodes.update(ns);
+};
+
+const setEdgesWidth = (es, width) => {
+  for (const edge of es) {
+    edge.width = width;
+  }
+
+  edges.update(es);
+};
+
+const bindNetwork = () => {
   network.on("click", (params) => {
     if (params.nodes.length) {
       const page = params.nodes[0];
@@ -124,14 +133,14 @@ const clearNetworkHover = () => {
   window.modEdges = [];
 };
 
-const clearNetwork = function () {
+const clearNetwork = () => {
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
   data = { nodes, edges };
   network.setData(data);
 };
 
-const searchNetwork = function (value) {
+const searchNetwork = (value) => {
   nodes.add([
     {
       id: value,
@@ -146,15 +155,7 @@ const searchNetwork = function (value) {
   doneNodes.push(value);
 };
 
-const getEdgeConnecting = function (a, b) {
-  const edge = edges.get({
-    filter: (e) => e.from === a && e.to === b,
-  })[0];
-
-  return (edge instanceof Object ? edge : {}).id;
-};
-
-const addNodes = function (label, level) {
+const addNodes = (label, level) => {
   Toast.show(Config.language == "en" ? "loading..." : "加载中...");
   getLinks(label).then((links) => {
     if (links.length === 0) {
@@ -166,8 +167,8 @@ const addNodes = function (label, level) {
     const newEdges = [];
     links = Array.from(new Set(links));
 
-    for (let index = 0; index < links.length; index++) {
-      const element = decodeURIComponent(links[index]).toLowerCase();
+    for (const link of links) {
+      const element = decodeURIComponent(link).toLowerCase();
 
       if (!nodes.getIds().includes(element)) {
         newNodes.push({
@@ -188,13 +189,14 @@ const addNodes = function (label, level) {
         });
       }
     }
+
     nodes.add(newNodes);
     edges.add(newEdges);
     doneNodes.push(label);
   });
 };
 
-const initNetWork = function () {
+const initNetWork = () => {
   nodes = new vis.DataSet();
   edges = new vis.DataSet();
   data = { nodes, edges };

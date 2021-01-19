@@ -4,7 +4,7 @@ const e = (selector) => document.querySelector(selector);
 
 const es = (selector) => document.querySelectorAll(selector);
 
-const bindEvent = function (element, eventName, callback) {
+const bindEvent = (element, eventName, callback) => {
   element.addEventListener(eventName, callback);
 };
 
