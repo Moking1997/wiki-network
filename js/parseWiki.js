@@ -1,71 +1,74 @@
+const doneDescription = {}
+
 const domParser = new DOMParser();
 
 const getPageTitle = (url) =>
-  url
+    url
     .split("/")
     .filter((el) => el)
     .pop()
     .split("#")[0];
 
 const isArticle = (name) =>
-  !(name.endsWith(":") ? name.slice(0, -1) : name).includes(":");
+    !(name.endsWith(":") ? name.slice(0, -1) : name).includes(":");
 
 const getFirstParagraph = (element) => {
-  return Array.from(
-    element.querySelectorAll(".mw-parser-output > p:not(.mw-empty-elt)")
-  ).find((p) => !p.querySelector("#coordinates"));
+    return Array.from(
+        element.querySelectorAll(".mw-parser-output > p:not(.mw-empty-elt)")
+    ).find((p) => !p.querySelector("#coordinates"));
 };
 
 const getPageData = (page) => {
-  const url = `${Config.api}w/api.php?format=json&origin=*&action=parse&prop=text&section=0&redirects=1&page=${page}`;
-  return fetch(url).then((response) => response.json());
+    const url = `${Config.api}w/api.php?format=json&origin=*&action=parse&prop=text&section=0&redirects=1&page=${page}`;
+    return fetch(url).then((response) => response.json());
 };
 
 const parseWikiData = (res) => {
-  if (res.error) {
-    log(res.error.code);
-    pageContainer.innerHTML = "";
-    return [];
-  } else {
-    const doc = domParser.parseFromString(res.parse.text["*"], "text/html");
-    let firstParagraph = getFirstParagraph(doc);
+    if (res.error) {
+        log(res.error.code);
+        pageContainer.innerHTML = "";
+        return [];
+    } else {
+        const doc = domParser.parseFromString(res.parse.text["*"], "text/html");
+        let firstParagraph = getFirstParagraph(doc);
 
-    // toggle description
-    showDescription(firstParagraph);
+        // add and toggle description
+        doneDescription[curSearch] = firstParagraph
+        showDescription(firstParagraph);
 
-    links = Array.from(firstParagraph.querySelectorAll("a"))
-      .map((link) => link.getAttribute("href"))
-      .filter((href) => href && href.startsWith("/wiki/"))
-      .map(getPageTitle)
-      .filter(isArticle)
-      .map((title) => title.replace(/_/g, " "));
-    return links;
-  }
+        links = Array.from(firstParagraph.querySelectorAll("a"))
+            .map((link) => link.getAttribute("href"))
+            .filter((href) => href && href.startsWith("/wiki/"))
+            .map(getPageTitle)
+            .filter(isArticle)
+            .map((title) => title.replace(/_/g, " "));
+        return links;
+    }
 };
 
 const getLinks = (page) => {
-  return getPageData(page).then((res) => parseWikiData(res));
+    return getPageData(page).then((res) => parseWikiData(res));
 };
 
 const showDescription = (firstParagraph) => {
-  pageContainer.innerHTML = "";
-  pageContainer.appendChild(firstParagraph);
-  const aLinks = es("a");
-  for (let index = 0; index < aLinks.length; index++) {
-    const el = aLinks[index];
-    const title = el.title;
-    const href = el.getAttribute("href");
-    if (href.startsWith("/wiki/")) {
-      bindEvent(el, "click", (e) => {
-        e.preventDefault();
-        openUrl(title);
-      });
-      bindEvent(el, "mouseenter", () => {
-        activeNetworkHover(title.toLowerCase());
-      });
-      bindEvent(el, "mouseleave", () => {
-        clearNetworkHover();
-      });
+    pageContainer.innerHTML = "";
+    pageContainer.appendChild(firstParagraph);
+    const aLinks = es("a");
+    for (let index = 0; index < aLinks.length; index++) {
+        const el = aLinks[index];
+        const title = el.title;
+        const href = el.getAttribute("href");
+        if (href.startsWith("/wiki/")) {
+            bindEvent(el, "click", (e) => {
+                e.preventDefault();
+                openUrl(title);
+            });
+            bindEvent(el, "mouseenter", () => {
+                activeNetworkHover(title.toLowerCase());
+            });
+            bindEvent(el, "mouseleave", () => {
+                clearNetworkHover();
+            });
+        }
     }
-  }
 };
